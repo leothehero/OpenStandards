@@ -1,60 +1,72 @@
 ## Adaptive Audio Format v1.1
-This is an audio format for OpenComputers. All numbers are little endian.
-
-Here are all common data you will find:
-```
-Signature (US-ASCII): <DC3>AAF<ETX>
-Wave Type: SQUARE (0) | SINE (1) | TRIANGLE (2) | SAWTOOTH (3)
-```
-
-### Capabilities
-Thoses are the capabilities required on the sound card by the current file.
-```
-- [WAVE TYPES] - Act as flag, 1 = SQUARE, 2 = SINE, 4 = TRIANGLE and 8 = SAWTOOTH
-- [FLAGS] - Same, a flag for miscelanous things, 1 = ADSR, 2 = VOLUME
-- [CHANNELS] - 1 byte unsigned number
-```
+The Adaptive Audio Format is an audio format for OpenComputers that can adapt to a lot of kinds of sound cards, this supports 255 channels, 65535Hz, ADSR and volume: all while still being compact. All numbers are little endian.
 
 ### Header
-```
-- [SIGNATURE]
-- [CAPABILITIES] - see Capabilities above
-- [AUDIO FRAGMENTS] - appended to each other
-```
+The header of the file starts with the signature, it is `<DC3>AAF<ETX>` where `<DC3>` is byte 19 and `<ETX>` is byte 3.  
+After the signature, there are the capabilities this file request, see Capabilities below.  
+Finally all the audio fragments this file is made of are appended one after the other as described by Audio fragment below.
+
+### Capabilities
+Thoses are the capabilities requested on the sound card by the current AAF file.  
+First are the types of waves being requested, this act as flags stored in a byte with following possible bits:
+
+Flag bits | Wave type
+--------- | ------------
+xxx1      | Square
+xx1x      | Sinusoidal
+x1xx      | Triangle
+1xxx      | Sawtooth
+
+After that there are other flags (stored in a byte), used for miscelanous requested features, here possible bits:
+
+Flag bits | Feature
+--------- | -----------
+x1        | ADSR
+1x        | VOLUME
+And then the requested capabilities end with an unsigned byte containing the number of channels to use.
 
 ### Audio fragment
-Total:
-Channel data is organized starting from 0 up into channel number - 1
-(so if 1 channel it's from 0 to 0, so one channel)
-This also means that for 1 channel it should be the Channel Data.
+An audio fragment contains multiple channel datas appended to each other depending on the number of channels.
+This mean for example, there is channel data for channel 1, then channel 2, then channel 3. The AAF player knows the number of channels (and by extension, of channel data in an audio fragment) via the Capabilities above.
+
+This means for 2 channels, an AAF file is: header then channel 1 data, channel 2 data, channel 1 data, channel 2 data, etc. until the file ends.
+
+This is also described by:
 ```
 - [PER CHANNEL DATA] x (channel number)
 ```
-Channel Data:
+
+#### Channel Data
 ```
 - [FREQUENCY] - unsigned short, in Hertz
 ```
 **[FREQUENCY] acts as action type if it is below 3Hz!**
 
-ASDR Packet (if action type is 1): 
+Packets are more data that should be appended just after the frequency when they have a corresponding action type, see below for the different packets:
+
+ASDR body (if action type is 1): 
 ```
 - [ATTACK] - unsigned short, duration in milliseconds
-- [DELAY] - unsigned short, duration in milliseconds
-- [SUSTAIN] - unsigned short, volume level (like [VOLUME])
+- [DELAY] - unsigned short, duration in milliseconds, equals to 0 if delay must be equal to the frequency of next audio fragments.
+- [SUSTAIN] - unsigned short, volume level (like volume packet)
 - [RELEASE] - unsigned short, duration in milliseconds
 ```
-Volume packet (if action type is 2):
+Volume body (if action type is 2):
 ```
 - [VOLUME] - unsigned byte, decimal obtained by dividing by 255 (giving 255 volume levels)
 ```
-Type packet (if action type is 3):
-```
-- [WAVE TYPE] - unsigned byte, described above. Must be only set at ONE flag
-```
-The packet always ends with (even if there's no action and a higher than 3Hz frequency is used):
+Wave type body (if action type is 3):
+If it's a wave type action (3 as frequency), wave type should be appended, it is an unsigned byte.
+For the type packet, wave type can have different values:
+Value | Wave Type
+------|----------------
+0     | Square wave
+1     | Sinusoidal wave
+2     | Triangle wave
+3     | Sawtooth wave
+
+Otherwise, if there is no action type (if the frequency is higher than 3Hz), then you should add:
 ```
 - [DURATION] - unsigned short, duration in milliseconds
 ```
 
-Q: Why wave type, ADSR and volume changes are appended with a wave body?  
-A: Because those changes apply directly to a wave, and thus can be executed just before it, so with that, this was done to allow packing and free a few bytes. So if it was separate, for ADSR it would size 8 bytes, where with current method it would use 7 bytes, effectively saving 1 byte PER CHANGE!
