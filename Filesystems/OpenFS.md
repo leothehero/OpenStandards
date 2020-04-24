@@ -22,6 +22,6 @@ Bytes 39-41: Permissions (3 bytes, owner-group-other, each byte 0-7)
 
 Bytes 41-63: Owner (15 bytes, string)
 
-Bytes 64-508 (4 byte chunks): pointers to file data sectors
+Bytes 64-508 (4 byte chunks): pointers to file data sectors or, if inode describes a directory, to its children
 
 Bytes 509-512: Pointer to a sector containing more data sector pointers, or 0 if there are none
