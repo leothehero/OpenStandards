@@ -16,12 +16,12 @@ Bytes 1-32: File name (32 bytes)
 
 Bytes 33-34: File type (1 byte)
 
-Bytes 35-38: Last modified (4 bytes)
+Bytes 35-38: Last modified (8 bytes)
 
 Bytes 39-41: Permissions (3 bytes, owner-group-other, each byte 0-7)
 
 Bytes 41-63: Owner (15 bytes, string)
 
-Bytes 64-508 (4 byte chunks): pointers to file data sectors or, if inode describes a directory, to its children
+Bytes 65-508 (4 byte chunks): pointers to file data sectors or, if inode describes a directory, to its children
 
 Bytes 509-512: Pointer to a sector containing more data sector pointers, or 0 if there are none
