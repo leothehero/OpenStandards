@@ -24,4 +24,4 @@ Bytes 41-63: Owner (15 bytes, string)
 
 Bytes 64-508 (4 byte chunks): pointers to file data sectors
 
-Bytes 509-512: Pointer to a sector containing more data sector pointers
+Bytes 509-512: Pointer to a sector containing more data sector pointers, or 0 if there are none
