@@ -8,7 +8,7 @@ The method in which OpenFS stores files borrows from the UNIX implementation; na
 
 The root inode sits on partition sector 2.
 
-Each inode contains the corresponding file's starting sector, ending sector, and type (`0` or `1` for file or directory, respectively). Each of the inode sectors can allocate 32 files, equating to 2560 total allocable files on a 4-megabyte partition.
+Each inode contains the corresponding file's starting sector, type (`0` or `1` for file or directory, respectively), and various metadata. Each inode takes a single 512-byte sector.
 
 Inodes are formatted as such:
 
