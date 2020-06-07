@@ -4,7 +4,16 @@ Boot sectors, RAID arrays, and partition tables were all discussed in OpenUPT.md
 
 ## Storing files
 
-The method in which OpenFS stores files borrows from the UNIX implementation; namely, the concept of index nodes or inodes.
+The method in which OpenFS stores files borrows from the UNIX implementation: namely, the concept of index nodes, or inodes.
+
+Sector 1 contains some information about the filesystem.
+
+Bytes 1-4: Filesystem version
+
+Bytes 5-8: Reserved
+
+Bytes 9-512: (126 4-byte chunks) A list of free inodes, automatically repopulated when empty.
+
 
 The root inode sits on partition sector 2.
 
