@@ -116,7 +116,8 @@ Each entry is exactly one byte long and contains the bits of the [braille patter
 Example: U+2813 is encoded to 0x13.
 
 Color struct:
-There is one color struct per 2x2 cell.
+
+There is one color struct per 2x4 pixel cell.
 ```
 <Background> - the color when braille pixel is reset/unset, format depending on bit depth
 <Foreground> - the color when braile pixel is set, format depending on bit depth
