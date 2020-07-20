@@ -28,10 +28,7 @@ increasing order dependending on entry ID of Image Data entries.
 Any entry start with a byte for its type and a 4 bytes integer for their length.
 So every entry start with `<Type> - Unsigned byte (0-255)` and `<Length> - Unsigned 4 bytes integer`.
 Entries might come in any order, but if an entry (ex: image data) have a dependency over another one (ex: rgb palette), the dependency must come before.
-Notice that unless marked so, any entry can be found multiple times in a single file. Allowing for multiple images in a single file.
-
-### Entry IDs
-An entry ID (and not type) is the place of the offset, so first entry is at ID 0, second at ID 1, ..., tenth at ID 9, etc, the entry id is stored on an unsigned byte thus limiting the number of entries to 256 (0-255). An entry cannot reference the entry ID 255 as it is used for saying the entry ID is unspecified.
+Notice that unless marked so, an entry type can be found multiple times in a single file,n including image data, which allows for multiple images in a single file.
 
 ### Metadata
 This entry **MUST** be on every file!
@@ -53,28 +50,77 @@ This also means images should never be a different bit depth than the palette wa
 ```
 <Values>
 ```
-Yep it just contain a Values field. This field corresponds to a concatenation of the 24-bit RGB values. Meaning the entry is 768 bits long for a 8-bit/12-bit/16-bit bit depth. What this means is that for example, 1-bit have 2 RGB colors, 2-bit have 4, 4-bit have 16, 8-bit 256, and 24-bit doesn't use any palette.
+Yep it just contain a Values field. This field corresponds to a concatenation of the 24-bit RGB values. Meaning the entry is 768 bits long for a 8-bit/12-bit/16-bit depth. What this means is that for example, 1-bit have 2 RGB colors, 2-bit have 4, 4-bit have 16, 8-bit 256, and 24-bit doesn't use any palette.
 
-### Image Data
-The entry type is 2. There **MUST** be atleast one image data in a file.
+There **MUST** be atleast one of the following image data in a file.
+
+### OC Image Data
+The entry type is 2.
 
 ```
 <Width> - Unsigned 2 bytes integer (0-65535)
 <Height> - Unsigned 2 bytes integer (0-65535)
 <Bit Depth> - Unsigned byte.
+<Compression> - Unsigned byte.
+<RGB Palette> - offset to the first byte of a palette, relative to the file start
+<Text Length> - The BYTE length of the text, remember a character, stored in a 4 bytes unsigned integer.
+<Text> - A 160x50 character array, appended in XY order from top-left. (this is not a Text type)
 <Pixels> - A list of pixel structs (format depending on bit depth) appended in XY order from top-left.
-```
-It always ends with:
-```
-<RGB Palette> - entry ID (see above)
 ```
 
 Pixel struct:
 ```
 <Background> - format depending on bit depth
 <Foreground> - format depending on bit depth
-<Character> - UTF-8 character that MUST FIT in 1 byte
 ```
+
+Example:
+```
+2 (Width)
+1 (Height)
+4 (24-bit depth)
+0 (not compressed)
+2
+Ab
+0x000000 (bg for char 1)
+0xFFFFFF (fg for char 1)
+0x000000 (bg for char 2)
+0xFFFFFF (fg for char 2)
+```
+This creates a 2x1 image, with the text
+
+The character for each pixel is to be found in the `<Text>`
+
+## Bitmap Image Data
+This image data type is very very useful for bitmaps (it is more efficient to treat braille-"extended" images as bitmap rather than OC image data)
+The entry type is 3.
+
+```
+<Width> - Unsigned 2 bytes integer (0-65535)
+<Height> - Unsigned 2 bytes integer (0-65535)
+<Bit Depth> - Unsigned byte.
+<Compression> - Unsigned byte.
+<RGB Palette> - offset to the first byte of a palette, relative to the file start
+<Bitmap> - Described below
+<Colors> - A list of color structs (format depending on bit depth) appended in XY order from top-left.
+```
+
+Bitmap:
+
+There is exactly one bitmap entry per braille pixel (so with full braille usage on a 160x50 image, this would mean a 320x200 bitmap)
+Each entry is ordered in XY order starting from the top-left.
+
+Each entry is exactly one byte long and contains the bits of the [braille pattern as defined by Unicode](https://en.wikipedia.org/wiki/Braille_Patterns#Identifying,_naming_and_ordering). If the source image uses braille, this is as simple as substrating 0x2800 from the Unicode codepoint.
+
+Example: U+2813 is encoded to 0x13.
+
+Color struct:
+There is one color struct per 2x2 cell.
+```
+<Background> - the color when braille pixel is reset/unset, format depending on bit depth
+<Foreground> - the color when braile pixel is set, format depending on bit depth
+```
+
 #### Bit Depths
 
 Byte Value | Bit Depth
@@ -93,3 +139,24 @@ The 12-bit is technically the hardest to implement due to reading being padded o
 1-bit, 4-bit and 8-bit colors are changed to 24-bit RGB values via the RGB palette. If the reference is null (equals to 255) then the default [OC palette is used](https://ocdoc.cil.li/_media/api:oc-256-color.png). 24-bit RGB is interpreted as it and the alpha values too.
 
 If the bit depth is 12-bit and the image ends not being padded on 8-bit, 4-bit padding must be added to fit. The padding can be anything as it is ignored.
+
+#### Compressions
+Byte Value | Compression Type
+---------- | ----------------
+0 | No Compression
+1 | RLE
+2 | Gzip
+3 | RLE + Gzip
+
+Compression is always only applied to the pixels of an image.
+
+#### RLE
+A parser will parse byte by byte for an opcode.
+Here is a list:
+Bits / Hex | Action
+---------- | ------
+0001xxxx | Repeat x times the following byte (x = bits & 0xF)
+001xxxxx | Repeat x times 255 (x = bits & 0x1F)Documents
+00xxxxxx | Repeat x times 0 (x = bits & 0x3F)
+01xxxxxx | Treat the following x bytes as a non-RLE encoded byte array (x = bits & 0x3F)
+1xxxxxxx |  Repeat x times the following byte (x = bits & 0x7F)
