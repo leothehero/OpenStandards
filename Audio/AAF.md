@@ -23,6 +23,7 @@ Flag bits | Feature
 --------- | -----------
 x1        | ADSR
 1x        | VOLUME
+
 And then the requested capabilities end with an unsigned byte containing the number of channels to use.
 
 ### Audio fragment
@@ -40,23 +41,22 @@ This is also described by:
 ```
 - [FREQUENCY] - unsigned short, in Hertz
 ```
-**[FREQUENCY] acts as action type if it is below 3Hz!**
 
 Packets are more data that should be appended just after the frequency when they have a corresponding action type, see below for the different packets:
 
-ASDR body (if action type is 1): 
+ASDR body (if frequency is 1): 
 ```
 - [ATTACK] - unsigned short, duration in milliseconds
 - [DELAY] - unsigned short, duration in milliseconds, equals to 0 if delay must be equal to the frequency of next audio fragments.
 - [SUSTAIN] - unsigned short, volume level (like volume packet)
 - [RELEASE] - unsigned short, duration in milliseconds
 ```
-Volume body (if action type is 2):
+Volume body (if frequency is 2):
 ```
 - [VOLUME] - unsigned byte, decimal obtained by dividing by 255 (giving 255 volume levels)
 ```
-Wave type body (if action type is 3):
-If it's a wave type action (3 as frequency), wave type should be appended, it is an unsigned byte.
+Wave type body (if frequency is 3):
+If it's a wave type action, wave type should be appended, it is an unsigned byte.
 For the type packet, wave type can have different values:
 Value | Wave Type
 ------|----------------
@@ -65,8 +65,9 @@ Value | Wave Type
 2     | Triangle wave
 3     | Sawtooth wave
 
-Otherwise, if there is no action type (if the frequency is higher than 3Hz), then you should add:
+Otherwise, if there if frequency is higher than 3Hz, then you should add:
 ```
 - [DURATION] - unsigned short, duration in milliseconds
 ```
+and the note is to be played.
 
