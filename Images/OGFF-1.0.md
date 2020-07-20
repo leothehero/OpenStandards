@@ -65,7 +65,7 @@ The entry type is 2, this image data type is mandatory for image that contain OC
 <Compression> - Unsigned byte.
 <RGB Palette> - offset to the first byte of a palette, relative to the file start
 <Text Length> - The BYTE length of the text, remember a character, stored in a 4 bytes unsigned integer.
-<Text> - A 160x50 character array, appended in XY order from top-left. (this is not a Text type) N<DC3>AAF<ETX>ote: a character is not always one byte!!!
+<Text> - A 160x50 character array, appended in XY order from top-left. (this is not a Text type) N<DC3>AAF<ETX>ote: a character is not always one byte!!! Use unicode aware functions to manipulate this.
 <Pixels> - A list of pixel structs (format depending on bit depth) appended in XY order from top-left.
 ```
 
