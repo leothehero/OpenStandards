@@ -28,7 +28,7 @@ increasing order dependending on entry ID of Image Data entries.
 Any entry start with a byte for its type and a 4 bytes integer for their length.
 So every entry start with `<Type> - Unsigned byte (0-255)` and `<Length> - Unsigned 4 bytes integer`.
 Entries might come in any order, but if an entry (ex: image data) have a dependency over another one (ex: rgb palette), the dependency must come before.
-Notice that unless marked so, an entry type can be found multiple times in a single file,n including image data, which allows for multiple images in a single file.
+Notice that unless marked so, an entry type can be found multiple times in a single file, including image data, which allows for multiple images in a single file.
 
 ### Metadata
 This entry **MUST** be on every file!
@@ -46,16 +46,17 @@ The entry type is 1 and the entry is optional. The bit depth is determined from 
 So if a 8-bit color depth image is linking to this palette, this should be interpreted as 8-bit palette.
 12-bit and 16-bit bit depth are 8-bit color depth (as they all use 8-bit for color, but just have additional bits for alpha), which mean a 8-bit palette is suited for those bit depths (8-bit, 12-bit and 16-bit)
 
-This also means images should never be a different bit depth than the palette was made word.
+This also means images should never be a different bit depth than the palette was made for.
 ```
 <Values>
 ```
 Yep it just contain a Values field. This field corresponds to a concatenation of the 24-bit RGB values. Meaning the entry is 768 bits long for a 8-bit/12-bit/16-bit depth. What this means is that for example, 1-bit have 2 RGB colors, 2-bit have 4, 4-bit have 16, 8-bit 256, and 24-bit doesn't use any palette.
 
+### Image Data
 There **MUST** be atleast one of the following image data in a file.
 
-### OC Image Data
-The entry type is 2.
+#### OC Image Data
+The entry type is 2, this image data type is mandatory for image that contain OC text, if the image doesn't contain any form of OC text, then Bitmap Image Data should be used instead.
 
 ```
 <Width> - Unsigned 2 bytes integer (0-65535)
@@ -91,7 +92,7 @@ This creates a 2x1 image, with the text
 
 The character for each pixel is to be found in the `<Text>`
 
-## Bitmap Image Data
+#### Bitmap Image Data
 This image data type is very very useful for bitmaps (it is more efficient to treat braille-"extended" images as bitmap rather than OC image data)
 The entry type is 3.
 
@@ -140,23 +141,23 @@ The 12-bit is technically the hardest to implement due to reading being padded o
 
 If the bit depth is 12-bit and the image ends not being padded on 8-bit, 4-bit padding must be added to fit. The padding can be anything as it is ignored.
 
-#### Compressions
+#### Compression Types
 Byte Value | Compression Type
 ---------- | ----------------
 0 | No Compression
 1 | RLE
 2 | Gzip
-3 | RLE + Gzip
+3 | RLE + Gzip (RLE is applied first, then Gzip)
 
 Compression is always only applied to the pixels of an image.
 
-#### RLE
+#### RLE Encoding
 A parser will parse byte by byte for an opcode.
-Here is a list:
+Here is a list of the opcode it can have:
 Bits / Hex | Action
 ---------- | ------
-0001xxxx | Repeat x times the following byte (x = bits & 0xF)
-001xxxxx | Repeat x times 255 (x = bits & 0x1F)Documents
-00xxxxxx | Repeat x times 0 (x = bits & 0x3F)
+0001xxx | Repeat x times the following byte (x = bits & 0x7)
+0000xxxx | Repeat x times 255 (x = bits & 0xF)
+001xxxxx | Repeat x times 0 (x = bits & 0x1F)
 01xxxxxx | Treat the following x bytes as a non-RLE encoded byte array (x = bits & 0x3F)
 1xxxxxxx |  Repeat x times the following byte (x = bits & 0x7F)
