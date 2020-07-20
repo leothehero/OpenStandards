@@ -156,8 +156,7 @@ A parser will parse byte by byte for an opcode.
 Here is a list of the opcode it can have:
 Bits / Hex | Action
 ---------- | ------
-0001xxx | Repeat x times the following byte (x = bits & 0x7)
-0000xxxx | Repeat x times 255 (x = bits & 0xF)
+000xxxxx | Repeat x times 255 (x = bits & 0x1F)
 001xxxxx | Repeat x times 0 (x = bits & 0x1F)
 01xxxxxx | Treat the following x bytes as a non-RLE encoded byte array (x = bits & 0x3F)
 1xxxxxxx |  Repeat x times the following byte (x = bits & 0x7F)
