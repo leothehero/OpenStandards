@@ -1,6 +1,6 @@
 # BROFS - Bootloader Read-Only FileSystem
 
-BROFS is the filesystem used by OpenBootLoader to load other filesystem drivers. It does not support directories, is limited to 64 files, and filenames are limited to 24 characters, making it in effect an organized pile of data with filenames on top.
+BROFS is a simple filesystem usable by bootloaders to load other filesystem drivers. It does not support directories, is limited to 64 files, and filenames are limited to 24 characters, making it in effect an organized pile of data with filenames on top.
 
 BROFS's fixed-size file table occupies the first 1024 bytes (2 sectors) of a partition. On boot, this file table is loaded into memory and parsed.
 
