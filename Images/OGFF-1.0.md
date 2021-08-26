@@ -1,4 +1,4 @@
-# Open Graphics Format (OGF)
+mp)àmiu!ç:è;iy kj,bn# Open Graphics Format (OGF)
 Note: any text between `<` and `>` is not literal text (of course) and is just are just placeholders for the actual values.
 
 OGF can contain multiple images, if the animated flag is set, it should be interpreted as an animation, otherwise if there are
@@ -9,7 +9,7 @@ multiple images that aren't animated, they should be just treated as a list of i
 ## Types
 Any `Text` type is a UTF-8 string starting with a 2 bytes unsigned integer (0-65535) for its length, any optional `Text` is counted as not present if the length is equals to 0. 
 
-A `Boolean` type is a byte equals to 0 for false or 1 for true. If the boolean value is any other value, the resulting boolean is false.
+A `Boolean` type is a byte equals to 0 for false or 1 for true. If the boolean value is any other value, the resulting boolean is true.
 
 ## Flags
 If least-significant bit is equals to 1 (flags & 0b00000001 == 0b00000001), the file is an animated image. The images are in
@@ -18,7 +18,7 @@ increasing order dependending on entry ID of Image Data entries.
 ## Header
 ```
 <Signature> - ASCII "OGFIMAG" followed by ASCII End Of Text (ETX, byte equals to 3)
-<Version> - Unsigned byte (currently equals to 1)
+<Version> - Unsigned byte (currently equals to 2)
 <Flags> - Byte, see above
 <Entries Length> - Unsigned byte (0-255)
 <Entries>
@@ -103,42 +103,28 @@ The entry type is 3.
 <Compression> - Unsigned byte.
 <RGB Palette> - offset to the first byte of a palette, relative to the file start
 <Bitmap> - Described below
-<Colors> - A list of color structs (format depending on bit depth) appended in XY order from top-left.
+<Foregrounds> - A list of foreground color (format depending on bit depth) appended in XY order from top-left.
+<Backgrounds> - A list of background color with same format as foregrounds
 ```
 
 Bitmap:
-
-There is exactly one bitmap entry per braille pixel (so with full braille usage on a 160x50 image, this would mean a 320x200 bitmap)
-Each entry is ordered in XY order starting from the top-left.
-
 Each entry is exactly one byte long and contains the bits of the [braille pattern as defined by Unicode](https://en.wikipedia.org/wiki/Braille_Patterns#Identifying,_naming_and_ordering). If the source image uses braille, this is as simple as substrating 0x2800 from the Unicode codepoint.
 
 Example: U+2813 is encoded to 0x13.
 
-Color struct:
-
-There is one color struct per 2x4 pixel cell.
-```
-<Background> - the color when braille pixel is reset/unset, format depending on bit depth
-<Foreground> - the color when braile pixel is set, format depending on bit depth
-```
+Background - the color when braille pixel is reset/unset, format depending on bit depth
+Foreground - the color when braile pixel is set, format depending on bit depth
 
 #### Bit Depths
 
 Byte Value | Bit Depth
 ---------- | ---------
-0 | 1-bit
-1 | 2-bit
-2 | 4-bit
 3 | 8-bit
 4 | 24-bit
 5 | 32-bit (24-bit + alpha 8-bit)
 6 | 16-bit (8-bit + alpha 8-bit)
-7 | 12-bit (8-bit + alpha 4-bit)
 
-The 12-bit is technically the hardest to implement due to reading being padded on 8-bit usually. So this would need to separate it into 2 4-bit values and read them independently. 
-
-1-bit, 4-bit and 8-bit colors are changed to 24-bit RGB values via the RGB palette. If the reference is null (equals to 255) then the default [OC palette is used](https://ocdoc.cil.li/_media/api:oc-256-color.png). 24-bit RGB is interpreted as it and the alpha values too.
+8-bit colors are changed to 24-bit RGB values via the RGB palette. If the reference is null (equals to 255) then the default [OC palette is used](https://ocdoc.cil.li/_media/api:oc-256-color.png). 24-bit RGB is interpreted as it and the alpha values too.
 
 If the bit depth is 12-bit and the image ends not being padded on 8-bit, 4-bit padding must be added to fit. The padding can be anything as it is ignored.
 
@@ -147,8 +133,6 @@ Byte Value | Compression Type
 ---------- | ----------------
 0 | No Compression
 1 | RLE
-2 | Gzip
-3 | RLE + Gzip (RLE is applied first, then Gzip)
 
 Compression is always only applied to the pixels of an image.
 
