@@ -1,4 +1,4 @@
-mp)àmiu!ç:è;iy kj,bn# Open Graphics Format (OGF)
+# Open Graphics Format (OGF)
 Note: any text between `<` and `>` is not literal text (of course) and is just are just placeholders for the actual values.
 
 OGF can contain multiple images, if the animated flag is set, it should be interpreted as an animation, otherwise if there are
