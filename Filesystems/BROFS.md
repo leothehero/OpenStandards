@@ -6,14 +6,18 @@ BROFS's fixed-size file table occupies the first 1024 bytes (2 sectors) of a par
 
 Each inode is 32 bytes:
 
-Bytes 1-2: Starting sector
-
-Bytes 3-4: Size in bytes, rounded up to sectors.
-
-Bytes 5-6: Preallocated space-- how big can it get?
-
-Byte 7: flags, entry is only valid if >=1
-
-Byte 8: Unused
-
-Bytes 9-32: Filename (24 bytes)
+```c
+struct Inode {
+  // Bytes 1-2: Starting sector
+  unsigned short start_sector;
+  // Bytes 3-4: Size in bytes, rounded up to sectors.
+  unsigned short size;
+  // Bytes 5-6: Preallocated space-- how big can it get?
+  unsigned short max_size;
+  // Byte 7: flags, entry is only valid if >=1
+  unsigned char flags;
+  // Byte 8: Unused
+  unsigned char unused;
+  // Bytes 9-32: Filename (24 bytes)
+  char filename[24];
+```
