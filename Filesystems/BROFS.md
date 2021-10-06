@@ -20,4 +20,5 @@ struct Inode {
   unsigned char unused;
   // Bytes 9-32: Filename (24 bytes)
   char filename[24];
+}
 ```
