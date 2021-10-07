@@ -102,7 +102,7 @@ struct Datablock {
 
 If the value of `next` is `0`, it marks the end of that block group.
 
-Directories are stored as an array of `Dirent`s (see `1.5`) inside a block group.
+Directories are stored as an array of `Dirent`s (see `1.5`) inside a block group.  The total length of the data in the block group is equal to the directory inode's `size` field.
 
 #### 1.5.  Dirent structure
 ```c
