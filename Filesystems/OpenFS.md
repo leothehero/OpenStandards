@@ -19,7 +19,7 @@ struct {
   // Bytes 9-512: (126 4-byte chunks) A list of free inodes, automatically repopulated when empty.
   unsigned int free_inodes[126];
 }
-
+```
 
 The root inode sits on partition sector 2.
 
