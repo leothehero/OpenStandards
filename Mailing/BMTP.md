@@ -67,7 +67,7 @@ arguments: `destination subject content embeds`
 An embed is an array of 2 strings: the first is the file name and the second is the data.
 
 ```
---> {0x03, "test@test.com", "Hey!", "blablabla", {{"test.arc", "binary data"}, {"test.txt", "some text document"}}}
+--> {0x03, "test@test.com", "Hey!", "blablabla", { {"test.arc", "binary data"}, {"test.txt", "some text document"} } }
 ```
 
 #### `LIST`
