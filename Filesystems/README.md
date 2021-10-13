@@ -1,6 +1,6 @@
 # Open Filesystem Standards
 
-[The Boot Loader Rad-Only File System](./BROFS)
+[The Boot Loader Read-Only File System](./BROFS)
 
 [The Cynosure File System](./CFS)
 
