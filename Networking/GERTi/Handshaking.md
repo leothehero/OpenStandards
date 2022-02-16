@@ -19,4 +19,4 @@ This assumes a functional GERTi network setup.
 
 For high-trust situations, this is effectively sufficient, but not implementing the next phase of the Handshake server-side risks interfering with other programs on the network, as all servers are expected to be capable of responding to Rich Information Requests, while clients are not expected to be capable of requesting Rich Information Requests.
 
-- In addition to all the normal methods a server
+- In addition to all the normal handlers a server will have, it must check for the string `"SERVERINFO"` being sent through a socket.
