@@ -1,0 +1,1 @@
+All standards here assume GERTi is being used. 
